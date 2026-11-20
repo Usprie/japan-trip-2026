@@ -67,6 +67,7 @@ header{padding-top:24px;padding-bottom:22px}header h1{font-size:clamp(24px,3vw,3
 @media print{.info.morning{background:#f3f6f3!important}}
 
 .map-switch{display:inline-flex;gap:3px;background:#e9ede8;border:1px solid #d8dfd8;border-radius:11px;padding:4px;margin:8px 0 3px}.map-switch-btn{border:0;border-radius:8px;padding:7px 13px;background:transparent;color:#4b6258;font:600 13px system-ui;cursor:pointer}.map-switch-btn.active{background:#fff;color:#244c3e;box-shadow:0 1px 4px #183a2a18}.mymaps-frame{height:340px;border:1px solid var(--line);border-radius:15px;overflow:hidden;margin:8px 0 10px;background:#eef1ed}.mymaps-frame iframe{display:block;width:100%;height:100%;border:0}.mymaps-hint{font-size:12px;color:#65746f;margin:5px 0}.mymaps-frame[hidden],.mymaps-hint[hidden],.map[hidden]{display:none!important}@media(max-width:767px){.mymaps-frame{height:360px}.map-switch-btn{font-size:12px;padding:7px 10px}}
+ruby{ruby-position:over}ruby rt{font-size:.58em;font-weight:500;color:#75847c;letter-spacing:.02em}.stop h3 ruby rt{font-size:.55em}.dayhead ruby rt{color:#71877d}
 </style></head><body><header><small>JAPAN JOURNEY · 2026.12.06—12.10</small><h1>熊野古道 × 京都歷史散策</h1></header><main>
 <div class="flight"><article><small>✈ 去程 · 12/6（日）</small><b>台北 TPE 09:00 → 大阪 KIX 12:20</b><div>Thai Lion Air SL396 · 約 2 小時 20 分</div><small>依你提供的機票截圖</small></article><article><small>✈ 回程 · 12/10（四）</small><b>大阪 KIX 20:55 → 台北 TPE 23:15</b><div>AirAsia AK177 · 約 3 小時 20 分</div><small>依你提供的機票截圖</small></article></div>
 <div class="tabs"><button class="active" data-tab="d6">12/6 入境・田邊</button><button data-tab="d7">12/7 熊野古道</button><button data-tab="d8">12/8 京都東山</button><button data-tab="d9">12/9 戰國・祇園</button><button data-tab="d10">12/10 回國</button><button data-tab="guide">可看性總覽</button><button data-tab="travel">交通提醒</button></div>
@@ -194,6 +195,34 @@ let coords=[];points[day].forEach((p,i)=>{const latlng=[p[1],p[2]];coords.push(l
 function setMapView(day,view){const leaflet=document.getElementById('map'+day),frame=document.getElementById('mymaps-'+day),hint=document.getElementById('mymaps-hint-'+day);const useMyMaps=view==='mymaps';leaflet.hidden=useMyMaps;frame.hidden=!useMyMaps;hint.hidden=!useMyMaps;document.querySelectorAll('.map-switch-btn[data-map-day="'+day+'"]').forEach(b=>{const active=b.dataset.mapView===view;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});if(useMyMaps&&!frame.querySelector('iframe')){const iframe=document.createElement('iframe');iframe.src=frame.dataset.src;iframe.title='Google My Maps：五天旅行景點總覽';iframe.loading='lazy';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.setAttribute('allowfullscreen','');frame.appendChild(iframe)}if(!useMyMaps){makeMap(day);window.dispatchEvent(new Event('resize'))}}
 document.querySelectorAll('.map-switch-btn').forEach(b=>b.addEventListener('click',()=>setMapView(Number(b.dataset.mapDay),b.dataset.mapView)));
 render();update();document.getElementById('ratings').innerHTML=places.filter(x=>x.score).sort((a,b)=>b.score-a.score).map(x=>`<article><h3>${x.name} <span class="stars">${'★'.repeat(x.score)}${'☆'.repeat(5-x.score)}</span></h3><p class="foot">${x.era} · 12/${x.day}</p><p>${x.desc}</p>${deepHistory[x.id]?`<p><b>${deepHistory[x.id].heading}：</b>${deepHistory[x.id].context}</p><p><b>現場怎麼看：</b>${deepHistory[x.id].focus}</p>`:""}<p><b>觀賞重點：</b>${x.look}</p><a class="link" href="${maps(x.map)}" target="_blank">查看位置 ↗</a></article>`).join('');
+
+/* Japanese place / bus names and furigana on the first large heading occurrence. */
+const jpLabels=[
+['熊野古道快速巴士','熊野古道快速バス',null],['94 號熊野線','94系統 熊野線',null],['80 號熊野本宮線','80系統 熊野本宮線',null],['特急黑潮號','特急くろしお',null],
+['紀伊田邊站','紀伊田辺駅','きいたなべえき'],['紀伊田邊','紀伊田辺','きいたなべ'],['紀伊田辺站','紀伊田辺駅','きいたなべえき'],['瀧尻王子','滝尻王子','たきじりおうじ'],['瀧尻','滝尻','たきじり'],['不寢王子','不寝王子','ねずおうじ'],['稻葉根王子','稲葉根王子','いなばねおうじ'],['潮見峠越','潮見峠越','しおみとうげごえ'],['北郡越','北郡越','ほくそぎごえ'],['熊野古道館','熊野古道館','くまのこどうかん'],
+['關西國際機場','関西国際空港','かんさいこくさいくうこう'],['關西機場','関西空港','かんさいくうこう'],['鬪雞神社','闘鶏神社','とうけいじんじゃ'],['二條城','二条城','にじょうじょう'],['三十三間堂','三十三間堂','さんじゅうさんげんどう'],['六波羅蜜寺','六波羅蜜寺','ろくはらみつじ'],['六道珍皇寺','六道珍皇寺','ろくどうちんのうじ'],['清水寺','清水寺','きよみずでら'],['三年坂','三年坂','さんねんざか'],['二年坂','二年坂','にねんざか'],['本能寺','本能寺','ほんのうじ'],['建仁寺','建仁寺','けんにんじ'],['安井金比羅宮','安井金比羅宮','やすいこんぴらぐう'],['八坂神社','八坂神社','やさかじんじゃ'],['祇園','祇園','ぎおん'],
+['黑門市場','黒門市場','くろもんいちば'],['日本橋電電街','日本橋でんでんタウン','にっぽんばしでんでんタウン'],['難波CITY','なんばCITY','なんばシティ'],['道頓堀','道頓堀','どうとんぼり'],['心齋橋','心斎橋','しんさいばし'],['南海難波','南海なんば','なんかいなんば'],['向越','向越','むかいごし'],['湊','湊','みなと']
+];
+const jpReading=new Map(jpLabels.filter(x=>x[2]).map(x=>[x[1],x[2]]));
+function localizeJapaneseLabels(){
+ const main=document.querySelector('main');if(!main)return;
+ const aliases=jpLabels.filter(x=>x[0]!==x[1]).sort((a,b)=>b[0].length-a[0].length);
+ const walker=document.createTreeWalker(main,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement&&n.parentElement.closest('script,style,ruby,rt,textarea')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+ const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+ for(const n of nodes){let v=n.nodeValue;for(const [a,b] of aliases)v=v.split(a).join(b);if(v!==n.nodeValue)n.nodeValue=v}
+ const seen=new Set(),names=[...jpReading.keys()].sort((a,b)=>b.length-a.length);
+ for(const h of main.querySelectorAll('h1,h2,h3')){const texts=[];const w=document.createTreeWalker(h,NodeFilter.SHOW_TEXT);while(w.nextNode())texts.push(w.currentNode);
+ for(const node of texts){if(node.parentElement.closest('ruby,rt'))continue;let text=node.nodeValue;const frag=document.createDocumentFragment();let changed=false;
+ while(text){let match=null,pos=Infinity;for(const name of names){if(seen.has(name))continue;const i=text.indexOf(name);if(i>=0&&i<pos){pos=i;match=name}}
+ if(!match){frag.appendChild(document.createTextNode(text));break}
+ if(pos>0)frag.appendChild(document.createTextNode(text.slice(0,pos)));
+ const ruby=document.createElement('ruby');ruby.appendChild(document.createTextNode(match));const rt=document.createElement('rt');rt.textContent=jpReading.get(match);ruby.appendChild(rt);frag.appendChild(ruby);seen.add(match);changed=true;text=text.slice(pos+match.length);
+ }
+ if(changed)node.replaceWith(frag);
+ }}
+}
+
+localizeJapaneseLabels();
 function showTab(id){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));if(/^d(6|7|8|9|10)$/.test(id))makeMap(Number(id.slice(1)))}document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));makeMap(6);
 document.querySelectorAll('[data-mobile-tab]').forEach(b=>b.addEventListener('click',()=>{showTab(b.dataset.mobileTab);window.scrollTo({top:0,behavior:'smooth'})}));
 const _showTabOriginal=showTab;
