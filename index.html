@@ -211,7 +211,7 @@ function localizeJapaneseLabels(){
  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
  for(const n of nodes){let v=n.nodeValue;for(const [a,b] of aliases)v=v.split(a).join(b);if(v!==n.nodeValue)n.nodeValue=v}
  const seen=new Set(),names=[...jpReading.keys()].sort((a,b)=>b.length-a.length);
- for(const h of main.querySelectorAll('h1,h2,h3')){const texts=[];const w=document.createTreeWalker(h,NodeFilter.SHOW_TEXT);while(w.nextNode())texts.push(w.currentNode);
+ for(const h of main.querySelectorAll('.timeline .stop h3')){const texts=[];const w=document.createTreeWalker(h,NodeFilter.SHOW_TEXT);while(w.nextNode())texts.push(w.currentNode);
  for(const node of texts){if(node.parentElement.closest('ruby,rt'))continue;let text=node.nodeValue;const frag=document.createDocumentFragment();let changed=false;
  while(text){let match=null,pos=Infinity;for(const name of names){if(seen.has(name))continue;const i=text.indexOf(name);if(i>=0&&i<pos){pos=i;match=name}}
  if(!match){frag.appendChild(document.createTextNode(text));break}
